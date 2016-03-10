@@ -3,7 +3,6 @@ public class HexNumber {
 	private static final long HEX_BASE = 16;
 	private static final String HEX_SYMBOLS = "10A11B12C13D14E15F"; 
 	private static final String REGEX = "[ABCDEF]{1}";
-
 	private String hexString;
 	private long hexDecimalValue;
 
