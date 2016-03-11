@@ -12,10 +12,20 @@ public class HexNumber {
 		hexDecimalValue = decimalValue(hexValue);
 	}
 
-	public HexNumber(long decimalValue ){	
+	public HexNumber(long decimalValue ){
+		
 		hexDecimalValue = decimalValue;
 		hexString = hexValue(decimalValue);
 	}
+
+	public long getDecimalValue(){
+		return hexDecimalValue;
+	}
+
+	public String getHexValue(){
+		return hexString;
+	}
+
 
 	//Convert Hex to binary
 	private String hexToBinary(String hexString){
@@ -117,6 +127,13 @@ public class HexNumber {
 			return buildHexFromNegativeDecimalBinary(twosC);
 		}
 	}
+	
+	//Change last bit of a binary
+	public String changeLastBit(String bin){
+		return "0"+bin.substring(1, bin.length());
+		
+		
+	}
 
 	//Convert a decimal value to binary
 	public static String binaryValues(long decimalValue){
@@ -167,12 +184,19 @@ public class HexNumber {
 
 	//Build the final hex string out of the twos complement binary string
 	private String buildHexFromNegativeDecimalBinary(String bin){
+		System.out.println("LAST STRING BEFORE CONVERSION: " + bin);
 		String finalHex = "";
 		int binaryLength = bin.length();
 		int startIndex = 0;
 		int nextIndex = 1;
 		int exponent = 3;
+
 		String currentChar = bin.substring(startIndex, nextIndex);
+		if(bin.substring(startIndex, nextIndex).equals("0")){
+			bin = "1111" + bin;
+			binaryLength = bin.length();
+			
+		}
 		int value = 0;
 
 		for(int i = 0; i<=binaryLength; i++){
@@ -186,6 +210,7 @@ public class HexNumber {
 				}
 				exponent = 3;
 				value = 0;
+
 			}
 			if(binaryLength==startIndex || nextIndex > binaryLength){
 				return finalHex;
@@ -252,12 +277,5 @@ public class HexNumber {
 		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(longVal+"")+2, HEX_SYMBOLS.indexOf(longVal+"")+3);		
 	}
 
-	public long getDecimalValue(){
-		return hexDecimalValue;
-	}
-
-	public String getHexValue(){
-		return hexString;
-	}
 
 }
