@@ -4,33 +4,21 @@ public class HexNumber {
 	private static final long BINARY_BASE = 2;
 	private static final String HEX_SYMBOLS = "10A11B12C13D14E15F"; 
 	private static final String REGEX = "[ABCDEF]{1}";
-	//private static final String REGEX= "[7-1]{1}";
 	private String hexString;
 	private long hexDecimalValue;
 
 	public HexNumber(String hexValue){
 		this.hexString = hexValue;
 		hexDecimalValue = decimalValue(hexValue);
-
 	}
 
-	public HexNumber(long decimalValue ){
-		System.out.println(Long.toBinaryString(decimalValue) + " Length:" + Long.toBinaryString(decimalValue).length());
+	public HexNumber(long decimalValue ){	
 		hexDecimalValue = decimalValue;
 		hexString = hexValue(decimalValue);
 	}
 
-	public long getDecimalValue(){
-		return hexDecimalValue;
-	}
-
-	public String getHexValue(){
-		return hexString;
-	}
-
-
 	//Convert Hex to binary
-	public static String hexToBinary(String hexString){
+	private String hexToBinary(String hexString){
 		int indexOne = -1;
 		int indexTwo = 0;
 		long currentVal = 0;
@@ -56,8 +44,9 @@ public class HexNumber {
 		return binaryString;
 	}
 
+
 	//Convert binary to decimal
-	public static void binaryToDecimal(String bin){
+	private long binaryToDecimal(String bin){
 		int last = bin.length();
 		int nextToLast = last - 1;
 		int exp = 0;
@@ -77,9 +66,8 @@ public class HexNumber {
 			}		
 		current = bin.substring(nextToLast, last);
 		}
-		System.out.println(nextToLast + "");
-		System.out.println("current char: " + current);
-		System.out.println(signDetermination(total, signVal, exp));
+
+		return signDetermination(total, signVal, exp);
 	}
 	
 	//Determine if number is negative or positive
@@ -94,45 +82,7 @@ public class HexNumber {
 
 	//Convert hex string to decimal
 	private long decimalValue(String hexString){
-		int startIndex = 0;
-		int nextIndex = 1;
-		int stringSize = hexString.length();
-		int exponent = hexString.length()-1;
-		String currentChar = hexString.substring(startIndex, nextIndex);
-		long currentVal = 0;
-		long currentNum = 0;
-		boolean isNeg = false;
-		for(int i = 0; i<=stringSize; i++){
-			if(currentChar.matches(REGEX)){
-				currentNum = Integer.valueOf(HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(currentChar)-2, HEX_SYMBOLS.indexOf(currentChar)));
-				currentVal += (long)(currentNum * Math.pow(HEX_BASE, exponent));
-			}
-			else{
-				currentNum = Integer.valueOf(currentChar);
-				currentVal += (long)currentNum * Math.pow(HEX_BASE, exponent);
-
-			}
-			if(i==0 && currentNum >=8){
-
-				isNeg=true;
-			}
-
-			exponent--;
-			startIndex++;
-			if(nextIndex + 1 > stringSize){
-				i = stringSize;
-				if(isNeg){
-					return currentVal*=-1;
-				}
-				else{
-					return currentVal;
-				}
-			}
-			nextIndex++;
-
-			currentChar = hexString.substring(startIndex, nextIndex);					
-		}
-		return -1;
+		return binaryToDecimal(hexToBinary(hexString));
 	}
 
 
@@ -162,15 +112,8 @@ public class HexNumber {
 		else{
 
 			String binaryNum = binaryValues(Math.abs(decimalValue));
-			System.out.println("Binary :           " + binaryNum + " Length: " + binaryNum.length());
 			String invertedBinary = invertABinaryValue(binaryNum);
-			System.out.println("Inverted Binary :  " + invertedBinary+ " Length: " + invertedBinary.length());
 			String twosC = twosComplementBinary(invertedBinary);
-			System.out.println("Two's Complement : " + twosC+ " Length: " + twosC.length());
-			while(twosC.length()%4!=0){
-				twosC = "1" + twosC;
-			}
-			System.out.println("New Twos Compl.:   " +   twosC + " Length: " + twosC.length());
 			return buildHexFromNegativeDecimalBinary(twosC);
 		}
 	}
@@ -186,6 +129,12 @@ public class HexNumber {
 			while(decimalValue>0){
 				binaryString = (decimalValue%2) + binaryString;
 				decimalValue /= 2;
+				if(decimalValue==0){
+					while(binaryString.length()%4!=0){
+						binaryString = (decimalValue%2) + binaryString;
+						decimalValue /= 2;	
+					}
+				}
 
 			}
 		}
@@ -223,7 +172,6 @@ public class HexNumber {
 		int startIndex = 0;
 		int nextIndex = 1;
 		int exponent = 3;
-
 		String currentChar = bin.substring(startIndex, nextIndex);
 		int value = 0;
 
@@ -238,9 +186,8 @@ public class HexNumber {
 				}
 				exponent = 3;
 				value = 0;
-
 			}
-			if(binaryLength==startIndex || nextIndex + 1 > binaryLength){
+			if(binaryLength==startIndex || nextIndex > binaryLength){
 				return finalHex;
 			}
 			currentChar = bin.substring(startIndex, nextIndex);
@@ -305,5 +252,12 @@ public class HexNumber {
 		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(longVal+"")+2, HEX_SYMBOLS.indexOf(longVal+"")+3);		
 	}
 
+	public long getDecimalValue(){
+		return hexDecimalValue;
+	}
+
+	public String getHexValue(){
+		return hexString;
+	}
 
 }
