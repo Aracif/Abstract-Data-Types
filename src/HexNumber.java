@@ -116,7 +116,7 @@ public class HexNumber {
 		return bin.toString();
 	}
 
-	public static String negativeBinaryToHexString(String binary){
+	public static String binaryToHexString(String binary){
 		StringBuffer hexNumbers = new StringBuffer();
 		int currentHexValue = 0;
 		int exponent = 0;
@@ -146,8 +146,9 @@ public class HexNumber {
 		return hexNumbers.toString();
 	}
 
-	public static void positiveBinaryToHex(String binary){
-		//May not be needed
+	public static String convertHexStringToBinary(String hex){
+		
+		return null;
 	}
 
 	public static String convertNumberToLetter(int number){
