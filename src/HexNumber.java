@@ -89,7 +89,7 @@ public class HexNumber {
 			System.out.println("no match");
 		}
 	}
-	
+
 	public static String twosComplement(StringBuffer bin){
 		int startIndex = bin.length()-1;
 		int nextIndex = bin.length();
@@ -115,6 +115,45 @@ public class HexNumber {
 
 		return bin.toString();
 	}
+
+	public static String negativeBinaryToHexString(String binary){
+		StringBuffer hexNumbers = new StringBuffer();
+		int currentHexValue = 0;
+		int exponent = 0;
+		int indexStart = binary.length() - 1;
+		int nextIndex = binary.length() ;
+		int currentBit = 0;
+		for(int i = 0; i<binary.length()/4 ; i++){
+			while(exponent<=3){
+				currentBit = Integer.valueOf(binary.substring(indexStart, nextIndex));
+				if(currentBit>0){
+					currentHexValue += Math.pow(BINARY_BASE, exponent);
+				}
+				exponent++;
+				indexStart--;
+				nextIndex--;
+			}
+			if(currentHexValue>=10){
+				hexNumbers.insert(0,convertNumberToLetter(currentHexValue));
+			}
+			else{
+				hexNumbers.insert(0,currentHexValue);
+			}
+			
+			currentHexValue=0;
+			exponent = 0;
+		}
+		return hexNumbers.toString();
+	}
+
+	public static void positiveBinaryToHex(String binary){
+		//May not be needed
+	}
+
+	public static String convertNumberToLetter(int number){
+		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(number+"")+2, HEX_SYMBOLS.indexOf(number+"")+3);		
+	}
+
 }
 
 
