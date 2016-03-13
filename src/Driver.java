@@ -17,8 +17,8 @@ public class Driver {
 //		numOne.divide(numTwo);
 //		System.out.println("Num one + Num two = " + numOne.getDecimalValue() + " , "  + numOne.getHexValue());
 
-
-		System.out.println(HexNumber.isHex("1DDFAap"));
+		
+		
 		
 	}	
 }

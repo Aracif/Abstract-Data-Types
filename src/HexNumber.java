@@ -10,13 +10,12 @@ public class HexNumber {
 	private static final String HEX_SYMBOLS = "10A11B12C13D14E15F"; 
 	private static final String HEX_INDEX ="ABCDEFabcdef";
 	private static final int[] values = new int[]{10,11,12,13,14,15,10,11,12,13,14,15};
-	private static final String BINARY_REGEX = "[(01)]|[(10)]+";
 	private static final String HEX_VERIFY = "[0-9a-fA-F]";
 	private String hexString;
 	private long hexDecimalValue;
 
 	public HexNumber(String hexValue){
-		this.hexString = hexValue;
+		setHexString(hexValue);
 		hexDecimalValue = decimalValue(hexValue);
 	}
 
@@ -34,9 +33,24 @@ public class HexNumber {
 		return hexString;
 	}
 
-
+	private void setHexStringCatch(String hexVal){
+		try{
+			if(isHex(hexVal)==true){
+				hexString = hexVal;
+			}		
+		}		
+		catch(InvalidHexException e){
+			e.printStackTrace();
+		}		
+	}
+	
 	private void setHexString(String hexVal){
+		if(isHex(hexVal)==false){
+			throw new InvalidHexException("Invalid Hex Value Detected", new Throwable());
+		}
+		else{
 		hexString = hexVal;
+		}
 	}
 
 	private void setDecimalValue(long decimalVal){
@@ -263,7 +277,7 @@ public class HexNumber {
 	}
 
 	//Not used but may be useful in the future
-	public static String fourBitBinary(int val){
+	private String fourBitBinary(int val){
 		
 		String binary = "";
 		String currentBit ="";
@@ -276,7 +290,7 @@ public class HexNumber {
 	}
 
 	//Convert hex to binary
-	public static String convertHexToBinary(String hex){
+	private String convertHexToBinary(String hex){
 		String binary = "";
 		String currentChar;
 		int start = hex.length()-1;
@@ -294,7 +308,7 @@ public class HexNumber {
 	}
 
 	//Hex value getter
-	public static int hexValueGetter(String hexChar){
+	private int hexValueGetter(String hexChar){
 		int hexVal = 0;
 		if(HEX_INDEX.contains(hexChar)){
 			hexVal = values[HEX_INDEX.indexOf(hexChar)];
@@ -322,7 +336,6 @@ public class HexNumber {
 			if(i==hexLength-1){
 				leftMostHex = currentHexValue;
 			}
-
 
 			total += currentHexValue * (long)Math.pow(HEX_BASE, i);
 			startIndex--;
