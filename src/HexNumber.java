@@ -97,7 +97,7 @@ public class HexNumber {
 		return finalHexCheck;
 	}
 	
-	///////////////////////////////Start hex conversion chain///////////////////////////////////////
+	///////////////////////////////Start decimal to hex conversion chain///////////////////////////////////////
 	//Convert numeric hex values >= 10 and <= 15 to letters
 	public String buildHexString(long decimal){
 		ArrayList<Integer> s = determineHexValues(getLargestHexBasedDivisor(decimal),decimal);
@@ -137,7 +137,11 @@ public class HexNumber {
 		}
 		return exp;
 	}
-	/////////////////////////end hex conversion chain////////////////////////////////////////////
+	/////////////////////////end decimal to hex conversion chain////////////////////////////////////////////
+	
+	/////////////////////////Start hex to decimal conversion////////////////////////////////////
+	
+	
 	
 	//Verify is input is a valid hex value
 	public static boolean isHex(String hex){
