@@ -1,19 +1,26 @@
+import java.util.Iterator;
+
+import java.text.*;
+
 
 public class HexNumber {
 	private static final long HEX_BASE = 16;
 	private static final long BINARY_BASE = 2;
+	private static final int BIT_NUMBER = 64;
 	private static final String HEX_SYMBOLS = "10A11B12C13D14E15F"; 
-	private static final String REGEX = "[ABCDEF]{1}";
+	private static final String HEX_INDEX ="ABCDEFabcdef";
+	private static final int[] values = new int[]{10,11,12,13,14,15,10,11,12,13,14,15};
+	private static final String HEX_VERIFY = "[0-9a-fA-F]";
 	private String hexString;
 	private long hexDecimalValue;
 
 	public HexNumber(String hexValue){
-		this.hexString = hexValue;
+		setHexString(hexValue);
 		hexDecimalValue = decimalValue(hexValue);
 	}
 
 	public HexNumber(long decimalValue ){
-		
+
 		hexDecimalValue = decimalValue;
 		hexString = hexValue(decimalValue);
 	}
@@ -26,256 +33,331 @@ public class HexNumber {
 		return hexString;
 	}
 
+	private void setHexStringCatch(String hexVal){
+		try{
+			if(isHex(hexVal)==true){
+				hexString = hexVal;
+			}		
+		}		
+		catch(InvalidHexException e){
+			e.printStackTrace();
+		}		
+	}
+	
+	private void setHexString(String hexVal){
+		if(isHex(hexVal)==false){
+			throw new InvalidHexException("Invalid Hex Value Detected", new Throwable());
+		}
+		else{
+		hexString = hexVal;
+		}
+	}
 
-	//Convert Hex to binary
-	private String hexToBinary(String hexString){
-		int indexOne = -1;
-		int indexTwo = 0;
-		long currentVal = 0;
-		String binaryString ="";
-		String currentChar;
-		boolean running = true;
-		while(running){
-			indexOne++;
-			indexTwo++;
-			if(indexOne == hexString.length()-1){
-				running = false;
-			}
-			currentChar = hexString.substring(indexOne, indexTwo);
-			if(currentChar.matches(REGEX)){
-				currentVal = Long.valueOf("1" + (REGEX.indexOf(currentChar)-1) );
+	private void setDecimalValue(long decimalVal){
+		hexDecimalValue = decimalVal;
+	}
+	
+	//Add two hex numbers
+	public void add(HexNumber hexObject){
+		hexDecimalValue += hexObject.getDecimalValue();
+		hexString = hexValue(hexDecimalValue);
+	}
+
+	//Multiply two hex numbers
+	public void multiply(HexNumber hexObject){
+		hexDecimalValue = hexDecimalValue * hexObject.getDecimalValue();
+		hexString = hexValue(hexDecimalValue);
+	}
+	
+	//Divide two hex numbers
+	public void divide(HexNumber hexObject){
+		hexDecimalValue = hexDecimalValue / hexObject.getDecimalValue();
+		hexString = hexValue(hexDecimalValue);
+	}
+	
+	//Substract two hex numbers
+	public void subtract(HexNumber hexObject){
+		hexDecimalValue = hexDecimalValue - hexObject.getDecimalValue();
+		hexString = hexValue(hexDecimalValue);
+	}
+	
+	//To string
+	public String toString(){
+		return hexString;
+	}
+	
+	//convert a decimal value to a hex string
+	public String hexValue(long decimal){
+		String hexValue = "";
+		if(decimal>=0){
+			String positiveBinary = positiveDecimalToBinary(decimal,BIT_NUMBER);
+			hexValue = binaryToHexString(positiveBinary);
+		}
+		else{
+			String negativeBinary = negativeDecimalToBinary(decimal, BIT_NUMBER);
+			hexValue = binaryToHexString(negativeBinary);
+		}
+		return hexValue;
+	}
+
+	//Verify is input is a valid hex value
+	public static boolean isHex(String hex){
+		StringCharacterIterator s = new StringCharacterIterator(hex);
+		Character currentChar=s.first();
+					
+		for(int i = 0; i<hex.length(); i++ ){		
+			if(String.valueOf(currentChar).matches(HEX_VERIFY)){
 			}
 			else{
-				currentVal = Long.valueOf(currentChar);				
+				return false;
 			}
-			binaryString += binaryValues(currentVal);
+			currentChar = s.next();
 		}
-		System.out.println(binaryString);
-		return binaryString;
+		return true;
+	}
+	
+	//Convert a hex string to a decimal value
+	public long decimalValue(String hex){
+		long val = 0;
+		if(Integer.valueOf(hexValueGetter(hex.substring(0, 1)))>=8){
+			if(hex.length()<16){
+				hex = paddingHexString(hex);
+				setHexString(hex);
+			}
+			String hexToBin = convertHexToBinary(hex);
+			
+			StringBuffer reverseBits = reverseBits(hexToBin);
+			String negativeBinary = twosComplement(reverseBits);
+			//System.out.println(negativeBinary);
+			val = binaryArithmetic(negativeBinary);
+
+		}
+		else{
+			if(hex.length()<16){
+				hex = paddingHexString(hex);
+				setHexString(hex);
+			}
+			val = convertHexStringToDecimal(hex);
+		}
+		//System.out.println(hex);
+		return val;
 	}
 
-
-	//Convert binary to decimal
-	private long binaryToDecimal(String bin){
-		int last = bin.length();
-		int nextToLast = last - 1;
-		int exp = 0;
-		String signVal = bin.substring(0, 1);
-		long total = 0;
-		boolean running = true;	
-		String current = bin.substring(nextToLast, last);
-		while(running){
-			if(current.equals("1")){
-				total += Math.pow(BINARY_BASE, exp);
-			}
-			exp++;
-			last--;
-			nextToLast--;
-			if(nextToLast==0){
-				running=false;
+	//Hex padding
+	private String paddingHexString(String hex){
+		String paddingValue = "0";
+		if(Integer.valueOf(hexValueGetter(hex.substring(0, 1)))>=8){
+			paddingValue = "F";
+		}
+			for(int i = 0; hex.length()!=16; i++){
+				hex = paddingValue + hex;
 			}		
-		current = bin.substring(nextToLast, last);
-		}
-
-		return signDetermination(total, signVal, exp);
+		return hex;
 	}
 	
-	//Determine if number is negative or positive
-	public static long signDetermination(long decimal, String signBit, long exp){
-		if(signBit.equals("1")){
-			return decimal -= Math.pow(BINARY_BASE, exp);
-		}
-		else{
-			return decimal;
-		}
-	}
-
-	//Convert hex string to decimal
-	private long decimalValue(String hexString){
-		return binaryToDecimal(hexToBinary(hexString));
-	}
-
-
-
-
-	//Makes use of getLargestDivisor(), getMod(), and longToHexLetters() in order to build
-	//the HexaDecimal representation of the parameter decimal value.
-	private String hexValue(long decimalValue){		
-		long currentValue = 0;
-		String hexString = "";			
-		long exponential = getLargestDivisor(decimalValue,HEX_BASE);
-		if(decimalValue>=0){
-			while(exponential>=0){
-				currentValue = (long)(decimalValue/Math.pow(HEX_BASE, exponential));
-				if((currentValue >= 10 && currentValue<=15)||(currentValue <= -10 && currentValue>=-15)){
-					hexString += longToHexLetter(currentValue);
-				}
-				else{
-					hexString += currentValue;
-				}
-
-				decimalValue = getMod(decimalValue, (long)Math.pow(HEX_BASE, exponential));
-				exponential--;
+	//Perform binary arithmetic
+	private long binaryArithmetic(String bin){
+		long total = 0;
+		String currentChar;
+		//int lastOccurenceOfOne = bin.lastIndexOf("1");
+		int start = bin.length() - 1;
+		int next = bin.length();
+		for(int i = 0; i<bin.length(); i++){
+			currentChar = bin.substring(start, next);
+			
+			if(hexValueGetter(currentChar)==1){
+				
+				total += Math.pow(BINARY_BASE, i);
 			}
-			return hexString;
+			start--;
+			next--;
 		}
-		else{
-
-			String binaryNum = binaryValues(Math.abs(decimalValue));
-			String invertedBinary = invertABinaryValue(binaryNum);
-			String twosC = twosComplementBinary(invertedBinary);
-			return buildHexFromNegativeDecimalBinary(twosC);
-		}
-	}
-	
-	//Change last bit of a binary
-	public String changeLastBit(String bin){
-		return "0"+bin.substring(1, bin.length());
-		
-		
+		return total * -1;
 	}
 
-	//Convert a decimal value to binary
-	public static String binaryValues(long decimalValue){
-		String zeroCount = "";
-		String binaryString = "";
-		if(decimalValue==0){
-			return binaryString += 0;
-		}
-		if(decimalValue>=8){
-			while(decimalValue>0){
-				binaryString = (decimalValue%2) + binaryString;
-				decimalValue /= 2;
-				if(decimalValue==0){
-					while(binaryString.length()%4!=0){
-						binaryString = (decimalValue%2) + binaryString;
-						decimalValue /= 2;	
-					}
-				}
+	//Converts a positive decimal value to binary
+	private String positiveDecimalToBinary(long decimal, int bits){
 
-			}
+		String binary = "";
+		long currentDecimal = Math.abs(decimal);
+		long currentBit;
+
+		while(binary.length()!= bits){
+			currentBit = currentDecimal%BINARY_BASE;
+			binary = currentBit + binary;
+			currentDecimal /= 2;
 		}
-		else{
-			do{
-				binaryString = (decimalValue%2) + binaryString;
-				decimalValue /= 2;		
-			}
-			while(binaryString.length()%4!=0);
-		}
-		System.out.println(binaryString);
-		return binaryString;
+		return binary;
 	}
 
-	//Add one to the binary number first position to make it negative
-	private String twosComplementBinary(String binString){
-		String s = "";
-		int lastIndex = binString.length();
-		int prev = lastIndex - 1;
-		String currentChar = binString.substring(prev, lastIndex);
-		while(currentChar.equals("1") && prev>=1){
-			s += "0";
-			lastIndex--;
-			prev--;
-			currentChar = binString.substring(prev, lastIndex);
-		}
-		s = "1" + s;
-		return binString.substring(0,prev) + s;
+	//Calls 3 methods positiveDecimalToBinary, positiveDecimalToBinary, and twosComplement
+	//these methods each perform a critical step in converting a negative number to binary
+	private String negativeDecimalToBinary(long decimal, int bits){
+		String binary = positiveDecimalToBinary(decimal, bits);
+		StringBuffer binaryReversed = reverseBits(binary);
+		String negativeBinary = twosComplement(binaryReversed);
+		return negativeBinary;
 	}
 
-	//Build the final hex string out of the twos complement binary string
-	private String buildHexFromNegativeDecimalBinary(String bin){
-		System.out.println("LAST STRING BEFORE CONVERSION: " + bin);
-		String finalHex = "";
-		int binaryLength = bin.length();
+	private StringBuffer reverseBits(String bin){
+		StringBuffer binary = new StringBuffer(bin);
 		int startIndex = 0;
 		int nextIndex = 1;
-		int exponent = 3;
-
-		String currentChar = bin.substring(startIndex, nextIndex);
-		if(bin.substring(startIndex, nextIndex).equals("0")){
-			bin = "1111" + bin;
-			binaryLength = bin.length();
-			
+		String currentBit;
+		for(int i = 0; i < binary.length(); i++){
+			currentBit = binary.substring(startIndex, nextIndex);
+			if(currentBit.equals("0")){
+				binary.replace(startIndex, nextIndex, "1");
+			}
+			else{
+				binary.replace(startIndex, nextIndex, "0");
+			}
+			startIndex++;
+			nextIndex++;
 		}
-		int value = 0;
+		return binary;
+	}
 
-		for(int i = 0; i<=binaryLength; i++){
 
-			if(exponent<= -1){
-				if(value <= 9){
-					finalHex += value + "";
+
+	private String twosComplement(StringBuffer bin){
+		int startIndex = bin.length()-1;
+		int nextIndex = bin.length();
+		String currentBit = bin.substring(startIndex,nextIndex);
+		if(bin.toString().contains("0")&& bin.toString().contains("1")){
+			for(int i = 0; i < bin.length(); i++){
+				if(currentBit.equals("0")){
+					bin.replace(startIndex, nextIndex, "1");
+					i = bin.length();
 				}
 				else{
-					finalHex += longToHexLetter(value);
+					bin.replace(startIndex, nextIndex, "0");
 				}
-				exponent = 3;
-				value = 0;
-
-			}
-			if(binaryLength==startIndex || nextIndex > binaryLength){
-				return finalHex;
-			}
-			currentChar = bin.substring(startIndex, nextIndex);
-			if(currentChar.equals("1")){
-				value += Math.pow(2, exponent);
-				startIndex++;
-				nextIndex++;
-				exponent--;
-			}
-			else{
-				startIndex++;
-				nextIndex++;
-				exponent--;
+				startIndex--;
+				nextIndex--;
+				currentBit = bin.substring(startIndex,nextIndex);
 			}
 		}
-		return finalHex;	
+		else{
+			bin = reverseBits(bin.toString());
+			bin.replace(bin.length()-1, bin.length(), "1");
+		}
+
+		return bin.toString();
 	}
 
-	//Invert a binary value
-	private String invertABinaryValue(String binaryString){
+	private String binaryToHexString(String binary){
+		StringBuffer hexNumbers = new StringBuffer();
+		int currentHexValue = 0;
+		int exponent = 0;
+		int indexStart = binary.length() - 1;
+		int nextIndex = binary.length() ;
+		int currentBit = 0;
+		for(int i = 0; i<binary.length()/4 ; i++){
+			while(exponent<=3){
+				currentBit = Integer.valueOf(binary.substring(indexStart, nextIndex));
+				if(currentBit>0){
+					currentHexValue += Math.pow(BINARY_BASE, exponent);
+				}
+				exponent++;
+				indexStart--;
+				nextIndex--;
+			}
+			if(currentHexValue>=10){
+				hexNumbers.insert(0,convertNumberToLetter(currentHexValue));
+			}
+			else{
+				hexNumbers.insert(0,currentHexValue);
+			}
+
+			currentHexValue=0;
+			exponent = 0;
+		}
+		return hexNumbers.toString();
+	}
+
+	//Not used but may be useful in the future
+	private String fourBitBinary(int val){
+		
+		String binary = "";
+		String currentBit ="";
+		while(binary.length()<4){
+			binary = val%2 + binary;
+			val /= 2;
+		}
+		
+		return binary;
+	}
+
+	//Convert hex to binary
+	private String convertHexToBinary(String hex){
+		String binary = "";
 		String currentChar;
-		String reversedBinary = "";
-		int start = 0;
-		int next = 1;
-		while(next<=binaryString.length()){
-			currentChar = binaryString.substring(start, next);
-			if(currentChar.equals("0")){
-				reversedBinary += "1";
-			}
-			else{
-				reversedBinary += "0";
-			}
-			start++;
-			next++;
+		int start = hex.length()-1;
+		int next = hex.length();
+		while(binary.length()<64){
+			currentChar = hex.substring(start, next);			
+			
+			int currentVal = hexValueGetter(currentChar);
+			binary = fourBitBinary(currentVal) + binary;
+
+			start--;
+			next--;
 		}
-
-		return reversedBinary;
+		return binary;
 	}
 
-
-
-	//Get the largest value of the base to a power that divides the parameter at least once
-	//Easily adaptable to accommodate other systems
-	private long getLargestDivisor(long decimalValue, long base){
-		long exponential = 0;	
-		for(long power = 0;(decimalValue/(Math.pow(base, power)))>= 1; power++){
-			exponential = power;
+	//Hex value getter
+	private int hexValueGetter(String hexChar){
+		int hexVal = 0;
+		if(HEX_INDEX.contains(hexChar)){
+			hexVal = values[HEX_INDEX.indexOf(hexChar)];
+		}
+		else{
+			hexVal = Integer.valueOf(hexChar);	
 		}	
-		return exponential;
+		return hexVal;
 	}
 
-	//Get the remainder of the largest divisor and the previous number so the largest
-	//divisor process can be repeated
-	private long getMod(long decimalValue, long modValue){
-		return decimalValue%modValue;
+	//Convert a signed hex string to a decimal
+	private long convertHexStringToDecimal(String hex){
+		int startIndex = hex.length()-1;
+		int nextIndex = hex.length();
+		String currentHexChar; 
+		long currentHexValue = 0;
+		long total = 0;
+		long leftMostHex = 0;
+		int hexLength = hex.length();
+
+		for(int i = 0; i<hexLength; i++){
+			currentHexChar = hex.substring(startIndex, nextIndex);
+
+			currentHexValue = hexValueGetter(currentHexChar);
+			if(i==hexLength-1){
+				leftMostHex = currentHexValue;
+			}
+
+			total += currentHexValue * (long)Math.pow(HEX_BASE, i);
+			startIndex--;
+			nextIndex--;
+		}
+		if(leftMostHex>=8){
+			return negativeHexToDecimalConversion(total, hexLength);
+		}
+		else{
+			return total;
+		}
 	}
 
-	//Get a letter from the hexSymbols string depending on the parameter
-	private String longToHexLetter(long longVal){
-
-		//if(longVal >= 10 && longVal <= 15){
-		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(longVal+"")+2, HEX_SYMBOLS.indexOf(longVal+"")+3);		
+	private long negativeHexToDecimalConversion(long value, int hexLength){
+		long nextHighestBit = (long)Math.pow(BINARY_BASE, hexLength*4);
+		return (value-nextHighestBit);
 	}
 
+	private String convertNumberToLetter(int number){
+		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(number+"")+2, HEX_SYMBOLS.indexOf(number+"")+3);		
+	}
 
 }
+
+
