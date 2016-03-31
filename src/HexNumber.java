@@ -88,6 +88,10 @@ public class HexNumber {
 		return hexString;
 	}
 	
+	public long decimalValue(String hex){
+		return convertHexStringToDecimal(hex);
+	}
+	
 	//convert a decimal value to a hex string
 	public String hexValue(long decimal){
 		String finalHexCheck = buildHexString(Math.abs(decimal));
@@ -140,8 +144,40 @@ public class HexNumber {
 	/////////////////////////end decimal to hex conversion chain////////////////////////////////////////////
 	
 	/////////////////////////Start hex to decimal conversion////////////////////////////////////
-	
-	
+	//Hex value getter
+	private int hexValueGetter(String hexChar){
+		int hexVal = 0;
+		if(HEX_INDEX.contains(hexChar)){
+			hexVal = values[HEX_INDEX.indexOf(hexChar)];
+		}
+		else{
+			hexVal = Integer.valueOf(hexChar);	
+		}	
+		return hexVal;
+	}
+
+	//Convert a signed hex string to a decimal
+	private long convertHexStringToDecimal(String hex){
+		int startIndex = hex.length()-1;
+		int nextIndex = hex.length();
+		String currentHexChar; 
+		long currentHexValue = 0;
+		long total = 0;
+		
+		int hexLength = hex.length();
+
+		for(int i = 0; i<hexLength; i++){
+			currentHexChar = hex.substring(startIndex, nextIndex);
+			currentHexValue = hexValueGetter(currentHexChar);
+			total += currentHexValue * (long)Math.pow(HEX_BASE, i);
+			startIndex--;
+			nextIndex--;
+		}
+
+			return total;
+		
+	}
+/////////////////////////end hex to decimal conversion////////////////////////////////////
 	
 	//Verify is input is a valid hex value
 	public static boolean isHex(String hex){
@@ -159,12 +195,8 @@ public class HexNumber {
 		return true;
 	}
 	
-	//Convert a hex string to a decimal value
-	public long decimalValue(String hex){
-		long val = 0;
+	
 
-		return val;
-	}
 
 	private String convertNumberToLetter(int number){
 		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(number+"")+2, HEX_SYMBOLS.indexOf(number+"")+3);		
