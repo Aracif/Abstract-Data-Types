@@ -3,6 +3,15 @@ import java.util.Iterator;
 
 import java.text.*;
 
+/**
+ * This class creates a HexNumber ADT. It has two constructors, one accepts a string representing a hexadecimal value,
+ * and the other accepts a decimal value. It contains various methods for performing operations on HexNumber objects.
+ * For those of you unfamiliar or new to the term ADT, an ADT is a set of values and a set of operations to be performed 
+ * on those values without specifying what the values will be or the operations to be performed hence the term abstract.
+ * 
+ * @author Sal Ficara
+ * @version 3.0
+ */
 
 public class HexNumber {
 	private static final long HEX_BASE = 16;
@@ -14,26 +23,50 @@ public class HexNumber {
 	private String hexString;
 	private long hexDecimalValue;
 
+	/**
+	 * HexNumber class constructor one
+	 * 
+	 * @param hexValue A hexadecimal string
+	 */
 	public HexNumber(String hexValue){
 		setHexString(hexValue);
 		hexDecimalValue = decimalValue(hexValue);
 	}
 
+	/**
+	 * HexNumber class constructor two
+	 * 
+	 * @param decimalValue A decimal value
+	 */
 	public HexNumber(long decimalValue ){
 
 		hexDecimalValue = decimalValue;
 		hexString = hexValue(decimalValue);
 	}
 
+	/**
+	 * Get the decimal value
+	 * 
+	 * @return A long decimal value
+	 */
 	public long getDecimalValue(){
 		return hexDecimalValue;
 	}
 
+	/**
+	 * Get the hex string class field
+	 * 
+	 * @return A string of hex values
+	 */
 	public String getHexValue(){
 		return hexString;
 	}
 
-	
+	/**
+	 * Set the hex string class instance
+	 * 
+	 * @param hexVal A string of hex values
+	 */
 	private void setHexString(String hexVal){
 		if(isHex(hexVal)==false){
 			throw new InvalidHexException("Invalid Hex Value Detected", new Throwable());
@@ -45,40 +78,80 @@ public class HexNumber {
 
 	
 	//Add two hex numbers
+	/**
+	 * Perform HexNumber addition
+	 * 
+	 * @param hexObject A HexNumber object
+	 * @return HexNumber
+	 */
 	public HexNumber add(HexNumber hexObject){
 		long temp = hexDecimalValue;
 		return new HexNumber(temp += hexObject.getDecimalValue());
 	}
 
 	//Multiply two hex numbers
+	/**
+	 * Perform HexNumber multiply
+	 * 
+	 * @param hexObject A HexNumber object
+	 * @return HexNumber
+	 */
 	public HexNumber multiply(HexNumber hexObject){
 		long temp = hexDecimalValue;
 		return new HexNumber(temp *= hexObject.getDecimalValue());
 	}
 	
 	//Divide two hex numbers
+	/**
+	 * Perform HexNumber divide
+	 * 
+	 * @param hexObject A HexNumber object
+	 * @return HexNumber
+	 */
 	public HexNumber divide(HexNumber hexObject){
 		long temp = hexDecimalValue;
 		return new HexNumber(temp /= hexObject.getDecimalValue());
 	}
 	
 	//Subtract two hex numbers
+	/**
+	 * Perform HexNumber subtract
+	 * 
+	 * @param hexObject A HexNumber object
+	 * @return HexNumber
+	 */
 	public HexNumber subtract(HexNumber hexObject){
 		long temp = hexDecimalValue;
 		return new HexNumber(temp - hexObject.getDecimalValue());
 	}
 	
 	//To string
+	
+	/**
+	 * Get the hex string
+	 * 
+	 *@return String 
+	 *@override
+	 */
 	public String toString(){
 		return hexString;
 	}
 	
-	
+	/**
+	 * 
+	 * @param hex A string of hex values
+	 * @return Decimal value
+	 */
 	public static long decimalValue(String hex){
 		return convertHexStringToDecimal(hex);
 	}
 	
 	//convert a decimal value to a hex string
+	/**
+	 * 
+	 * @param long
+	 * @return String of hex values
+	 */
 	public static String hexValue(long decimal){
 		String finalHexCheck = buildHexString(Math.abs(decimal));
 		if(decimal < 0){
@@ -92,6 +165,11 @@ public class HexNumber {
 	
 	///////////////////////////////Start decimal to hex conversion chain///////////////////////////////////////
 	//Convert numeric hex values >= 10 and <= 15 to letters
+	/**
+	 * 
+	 * @param decimal A long value
+	 * @return String
+	 */
 	public static String buildHexString(long decimal){
 		ArrayList<Integer> s = determineHexValues(getLargestHexBasedDivisor(decimal),decimal);
 		int size = s.size();
@@ -109,6 +187,12 @@ public class HexNumber {
 	}
 	
 	//Get the hex string numeric values
+	/**
+	 * 
+	 * @param exp int value
+	 * @param decimal long value
+	 * @return ArrayList<Integer>
+	 */
 	private static ArrayList<Integer> determineHexValues(int exp, long decimal){
 		ArrayList<Integer> s = new ArrayList<Integer>();
 		long newDecimal = decimal;
@@ -121,6 +205,11 @@ public class HexNumber {
 	}
 	
 	//Get largest base 16 to a power that divides the decimal
+	/**
+	 * 
+	 * @param decimal long value
+	 * @return int
+	 */
 	private static int getLargestHexBasedDivisor(long decimal){
 		long largestDivisor = Long.MAX_VALUE;
 		int exp = -1;
@@ -134,6 +223,11 @@ public class HexNumber {
 	
 	/////////////////////////Start hex to decimal conversion////////////////////////////////////
 	//Hex value getter
+	/**
+	 * 
+	 * @param hexChar String
+	 * @return int
+	 */
 	private static int hexValueGetter(String hexChar){
 		int hexVal = 0;
 		if(HEX_INDEX.contains(hexChar)){
@@ -148,6 +242,11 @@ public class HexNumber {
 	}
 
 	//Convert a signed hex string to a decimal
+	/**
+	 * 
+	 * @param hex String
+	 * @return long
+	 */
 	private static long convertHexStringToDecimal(String hex){
 		int startIndex = hex.length()-1;
 		int nextIndex = hex.length();
@@ -173,6 +272,11 @@ public class HexNumber {
 /////////////////////////end hex to decimal conversion////////////////////////////////////
 	
 	//Verify is input is a valid hex value
+	/**
+	 * 
+	 * @param hex String
+	 * @return boolean
+	 */
 	public static boolean isHex(String hex){
 		StringCharacterIterator s = new StringCharacterIterator(hex);
 		Character currentChar=s.first();
@@ -188,6 +292,11 @@ public class HexNumber {
 		return true;
 	}
 	
+	/**
+	 * 
+	 * @param number int
+	 * @return String
+	 */
 	private static String  convertNumberToLetter(int number){
 		return HEX_SYMBOLS.substring(HEX_SYMBOLS.indexOf(number+"")+2, HEX_SYMBOLS.indexOf(number+"")+3);		
 	}

@@ -1,6 +1,10 @@
 
 public class Driver {
 
+	/**
+	 * Main method, tests out ADT functionality to show correctness 
+	 * @param args
+	 */
 	public static void main(String[] args){
 		HexNumber numOne = new HexNumber("-A");
 		System.out.println(numOne.getDecimalValue());
